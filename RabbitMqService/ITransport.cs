@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PublisherService
+namespace RabbitMqService
 {
-    public interface IMessageProcessor
+    public interface ITransport
     {
-        void ProcesStatement(string name);
+        Task Publish(string route, ReadOnlyMemory<byte> body);
     }
 }
