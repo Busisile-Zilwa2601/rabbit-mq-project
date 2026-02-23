@@ -1,14 +1,39 @@
 ﻿using PublisherService;
+using RabbitMQ.Client;
+using RabbitMqService;
+using Microsoft.Extensions.DependencyInjection;
 
-internal class Program
-{
-    private static void Main(string[] args)
+namespace PublisherService
+{ 
+    class Program
     {
-        Console.WriteLine("Please enter your name: ");
-        var name = Console.ReadLine();
+        static async Task Main(string[] args)
+        {
+            var services = new ServiceCollection();
+            services.AddSingleton<ITransport>(sp =>
+            {
+                var factory = new ConnectionFactory
+                { 
+                    HostName = "localhost",
+                    Port = 5672,
+                    UserName = "guest",
+                    Password = "guest"
+                };
 
-        var message = new MessagePublisher();
-        message.SendMessage(new MessageFactory(), name ?? "");
-        Console.ReadKey();
+                return new RabbitMqTransport(factory) { };
+            });
+        
+            services.AddSingleton<ServiceBus>();
+            var serviceProvider = services.BuildServiceProvider();
+            var serviceBus = serviceProvider.GetRequiredService<ServiceBus>();
+
+            Console.WriteLine("Please enter your name: ");
+            var name = Console.ReadLine();
+            var message = $"Hello my name is, {name}";
+
+            await serviceBus.Publish(message);
+            Console.ReadKey();
+        }
     }
+
 }
