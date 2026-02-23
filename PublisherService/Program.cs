@@ -1,5 +1,4 @@
-﻿using PublisherService;
-using RabbitMQ.Client;
+﻿using RabbitMQ.Client;
 using RabbitMqService;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -22,16 +21,17 @@ namespace PublisherService
 
                 return new RabbitMqTransport(factory) { };
             });
-        
+
+            services.AddSingleton<IMessageSerializer, MessageSerializer>();
             services.AddSingleton<ServiceBus>();
             var serviceProvider = services.BuildServiceProvider();
             var serviceBus = serviceProvider.GetRequiredService<ServiceBus>();
 
             Console.WriteLine("Please enter your name: ");
             var name = Console.ReadLine();
-            var message = $"Hello my name is, {name}";
+            var message =  $"Hello my name is, {name}";
 
-            await serviceBus.Publish(message);
+            await serviceBus.Publish(new Message(message));
             Console.ReadKey();
         }
     }

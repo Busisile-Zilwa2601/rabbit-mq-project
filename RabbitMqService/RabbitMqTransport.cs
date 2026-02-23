@@ -11,7 +11,7 @@ namespace RabbitMqService
         private IConnection? connection;
         protected readonly IChannel? channel;
 
-        protected TopologyOptons config;
+        //protected TopologyOptons config;
 
         public RabbitMqTransport(ConnectionFactory factory)
         { 
