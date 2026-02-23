@@ -5,6 +5,8 @@ VisualStudioVersion = 17.14.36401.2 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PublisherService", "PublisherService.csproj", "{0990E501-575A-448B-B60B-D5FB5EECD54F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RabbitMqService", "..\RabbitMqService\RabbitMqService.csproj", "{D3B5E9A0-1234-4C6A-B7E8-ABCDEF123456}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{0990E501-575A-448B-B60B-D5FB5EECD54F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0990E501-575A-448B-B60B-D5FB5EECD54F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0990E501-575A-448B-B60B-D5FB5EECD54F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3B5E9A0-1234-4C6A-B7E8-ABCDEF123456}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3B5E9A0-1234-4C6A-B7E8-ABCDEF123456}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3B5E9A0-1234-4C6A-B7E8-ABCDEF123456}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3B5E9A0-1234-4C6A-B7E8-ABCDEF123456}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
