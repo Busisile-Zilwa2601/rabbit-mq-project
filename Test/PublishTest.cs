@@ -36,6 +36,7 @@ public class PublishTest
 
         Assert.AreEqual(typeof(PublisherService.Message).Namespace + ":" + nameof(PublisherService.Message), cRoute);
         Assert.IsNotNull(cBody);
+        Assert.IsNotNull(cRoute);
         StringAssert.Contains(Encoding.UTF8.GetString(cBody), "Thulani");
     }
 }
