@@ -9,5 +9,6 @@ namespace RabbitMqService
     public interface ITransport
     {
         Task Publish(string route, ReadOnlyMemory<byte> body);
+        Task AddConsumer(string route, Func<ReadOnlyMemory<byte>, Task> handler);
     }
 }

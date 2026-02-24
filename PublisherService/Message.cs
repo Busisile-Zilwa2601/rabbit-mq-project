@@ -10,5 +10,6 @@ namespace PublisherService
         { 
             Name = name;
         }
+        public override string ToString() => $"Hello my name is, {Name}";
     }
 }

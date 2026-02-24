@@ -29,9 +29,9 @@ namespace PublisherService
 
             Console.WriteLine("Please enter your name: ");
             var name = Console.ReadLine();
-            var message =  $"Hello my name is, {name}";
+            var message = new Message(name);
 
-            await serviceBus.Publish(new Message(message));
+            await serviceBus.Publish(message);
             Console.ReadKey();
         }
     }
