@@ -11,8 +11,6 @@ namespace RabbitMqService
         private IConnection? connection;
         protected readonly IChannel? channel;
 
-        //protected TopologyOptons config;
-
         public RabbitMqTransport(ConnectionFactory factory)
         { 
             this.factory = factory;
@@ -23,21 +21,6 @@ namespace RabbitMqService
         public async Task Publish(string route, ReadOnlyMemory<byte> body)
         {
             await this.channel!.ExchangeDeclareAsync(route, ExchangeType.Fanout, durable: true, autoDelete: false);
-
-            // ensure a queue exists and is bound to the exchange for this route
-            var queueName = SanitizeQueueName(route);
-            await this.channel!.QueueDeclareAsync(
-                queue: queueName,
-                durable: true,
-                exclusive: false,
-                autoDelete: false,
-                arguments: null);
-
-            await this.channel!.QueueBindAsync(
-                queue: queueName,
-                exchange: route,
-                routingKey: string.Empty,
-                arguments: null);
 
             var props = new BasicProperties();
             props.ContentType = "application/json";
@@ -57,57 +40,33 @@ namespace RabbitMqService
             // replace characters that are not safe in queue names
             return route.Replace(':', '-').Replace('/', '-').Replace(' ', '-');
         }
-        //protected RabbitMqTransport(ConnectionFactory factory, TopologyOptons config)
-        //{
-
-        //    this.config = config;
-        //    this.connection = factory.CreateConnectionAsync().GetAwaiter().GetResult();
-        //    this.channel  = this.connection.CreateChannelAsync().GetAwaiter().GetResult();
-        //    this.channel.ExchangeDeclareAsync(this.config.ExchangeName, ExchangeType.Fanout, true).GetAwaiter().GetResult();
-        //    this.channel.QueueDeclareAsync(this.config.QueueName, true, false, false, null).GetAwaiter().GetResult();
-        //    this.channel.QueueBindAsync(this.config.QueueName, this.config.ExchangeName, this.config.RoutingKey, null).GetAwaiter().GetResult();
-        //}
 
 
-        //private async Task EnsureOpen()
-        //{ 
-        //    this.connection = this.connection ?? await this.factory.CreateConnectionAsync();
-        //    this.channel = this.channel ?? await this.connection.CreateChannelAsync();
-        //}
-        //public void Dispose()
-        //{ 
-        //    try
-        //    {
-        //        this.channel?.CloseAsync().GetAwaiter().GetResult();
-        //        //Thread.Sleep(500);
-        //        //this.channel?.Dispose();
-        //        //this.connection?.CloseAsync().GetAwaiter().GetResult();
-        //        //Thread.Sleep(500);
-        //        //this.connection?.Dispose();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine($"[RabbitMqServiceBase] Error during dispose: {ex.Message}");
-        //    }
-        //    try { this.connection?.CloseAsync(); } catch (Exception ex) { Console.WriteLine(ex.ToString()); }
-        //}
+        public async Task AddConsumer(string route, Func<ReadOnlyMemory<byte>, Task> handler)
+        {
+            await this.channel!.ExchangeDeclareAsync(route, ExchangeType.Fanout, durable: true, autoDelete: false);
 
-        //public async Task Publish(TopologyOptons opt, ReadOnlyMemory<byte> body, CancellationToken ct)
-        //{
-        //    await EnsureOpen();
+            // ensure a queue exists and is bound to the exchange for this route
+            var queueName = SanitizeQueueName(route);
+            await this.channel!.QueueDeclareAsync(queue: queueName, durable: true, exclusive: false,autoDelete: false, arguments: null);
+            await this.channel!.QueueBindAsync(queue: queueName,exchange: route,routingKey: string.Empty,arguments: null);
 
-        //    await this.channel!.ExchangeDeclareAsync(
-        //        opt.ExchangeName, 
-        //        ExchangeType.Fanout, 
-        //        durable:true,
-        //        autoDelete: false);
+            var consumer = new AsyncEventingBasicConsumer(this.channel);
+            consumer.ReceivedAsync += async (_, ea) =>
+            {
+                try
+                {
+                    await handler(ea.Body.ToArray());
+                    await this.channel.BasicAckAsync(ea.DeliveryTag, multiple: false);
+                }
+                catch
+                {
+                    await this.channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false);
+                }
+            };
 
-        //    await this.channel!.QueueDeclareAsync(
-        //        opt.QueueName, 
-        //        durable: true,
-
-
-        //}
+            await this.channel.BasicConsumeAsync(queue: queueName, autoAck: false, consumer: consumer);
+        }
 
         public async ValueTask DisposeAsync()
         {
