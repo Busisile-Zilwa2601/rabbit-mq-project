@@ -1,0 +1,55 @@
+services:
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    container_name: rabbit-wonga-v1
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - 'rabbitmq_data:/data'
+    networks:
+        - wonga_network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+  publisherservice:
+    image: publisherservice
+    build:
+      context: .
+      dockerfile: PublisherService/Dockerfile
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - RABBITMQ_HOST=rabbit
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASS=guest
+      - RABBITMQ_URL=ampq://rabbitmq:5672
+    networks:
+      - wonga_network
+      
+  consumerservice:
+    image: consumerservice
+    build:
+      context: .
+      dockerfile: ConsumerService/Dockerfile
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - RABBITMQ_HOST=rabbit
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASS=guest
+      - RABBITMQ_URL=ampq://rabbitmq:5672 
+    networks:
+      - wonga_network
+volumes:
+  rabbitmq_data:
+networks:
+  wonga_network:
+    driver: bridge
