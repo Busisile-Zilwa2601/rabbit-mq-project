@@ -5,7 +5,7 @@ It includes two services (publisher and consumer), a lightweight RabbitMQ wrappe
 **Contents**
 - `PublisherService/` : publisher that sends messages.
 - `ConsumerService/` : consumer that receives and processes messages.
-- `RabbitMqService/` : shared transport and serializer interfaces and a RabbitMQ transport implementation.
+- `RabbitMqService/` : shared transport and serializer interfaces and a RabbitMQ transport implementation. This implementation allows easy addition of     message brokers.
 - `Test/` : unit/integration test examples for the components.
 - `docker-compose.yaml` : optional Docker Compose setup for RabbitMQ and services.
 
